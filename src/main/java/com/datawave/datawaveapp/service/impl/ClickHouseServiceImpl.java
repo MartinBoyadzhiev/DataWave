@@ -1,39 +1,30 @@
 package com.datawave.datawaveapp.service.impl;
 
 import com.datawave.datawaveapp.model.dto.PriceMetricRecord;
+import com.datawave.datawaveapp.model.entity.ColumnName;
+import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
+import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
 import com.datawave.datawaveapp.service.ClickHouseService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class ClickHouseServiceImpl implements ClickHouseService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final MetricMetadataRepository metricMetadataRepository;
 
-    public ClickHouseServiceImpl(@Qualifier("clickTemplate") JdbcTemplate jdbcTemplate) {
+    public ClickHouseServiceImpl(@Qualifier("clickTemplate") JdbcTemplate jdbcTemplate, MetricMetadataRepository metricMetadataRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.metricMetadataRepository = metricMetadataRepository;
     }
 
     @Override
-    public List<PriceMetricRecord> getMetricByJdbc() {
-
-        return this.jdbcTemplate.query("SELECT * FROM metric_price",
-                (rs, rowNum) -> new PriceMetricRecord(
-                        rs.getTimestamp("timestamp").toInstant(),
-                        rs.getFloat("value"),
-                        rs.getString("asset"),
-                        rs.getString("exchange")
-                ));
-    }
-
-    @Override
-    public List<PriceMetricRecord> getMetric(String metricName) {
+    public List<PriceMetricRecord> getMetricData(String metricName) {
 
         return this.jdbcTemplate.query("SELECT * FROM ?",
                 ps -> ps.setString(1, metricName),
@@ -48,47 +39,52 @@ public class ClickHouseServiceImpl implements ClickHouseService {
     @Override
     public List<String> getColumns(String metricName) {
 
-        List<List<String>> result = this.jdbcTemplate.query("SELECT * FROM ? LIMIT 1",
-                ps -> ps.setString(1, metricName),
-                (rs, rowNum) -> {
-                    List<String> list = new ArrayList<>();
-                    for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                        list.add(rs.getMetaData().getColumnName(i));
-                    }
-                    return list;
-                }
-        );
-        return !result.isEmpty() ? result.get(0) : null;
+        MetricMetadataEntity metricMetadata = metricMetadataRepository.findByMetricName(metricName)
+                .orElseThrow(() -> new IllegalArgumentException("Metric not found"));
+
+        return metricMetadata.getColumnNames().stream().map(ColumnName::getName).collect(Collectors.toList());
     }
 
-    //FIXME SQL Injection vulnerability
     @Override
-    public List<String> getFilteredValues(String metricName, String column, Map<String, Object> filter) {
+    public List<String> getFilteredValues(String metricName, String column, Map<String, Object> webFilter) {
 
-        StringBuilder whereClause = new StringBuilder();
+        Map<String, Object> sortedFilters = new TreeMap<>(webFilter);
 
-        if (!filter.isEmpty()) {
+        Optional<MetricMetadataEntity> optionalMetricMetadata = metricMetadataRepository.findByMetricName(metricName);
+        if(optionalMetricMetadata.isEmpty()) {
+            throw new IllegalArgumentException("Metric not found");
+        }
+        MetricMetadataEntity metricMetadata = optionalMetricMetadata.get();
 
-            String collected = filter.entrySet()
-                    .stream()
-                    .map(kv -> kv.getKey() + " = '" + kv.getValue() + "'")
-                    .collect(Collectors.joining(" and "));
-
-            whereClause.append("SELECT DISTINCT " + column + " FROM " + metricName + " WHERE ").append(collected);
+        if(!metricMetadata.getColumnNames().contains(new ColumnName(column))) {
+            throw new IllegalArgumentException("Column not found: " + column);
         }
 
-        return this.jdbcTemplate.query(whereClause.toString(),
-                (rs, rowNum) -> rs.getString(column)
-        );
+        for (String filterColumn : webFilter.keySet()) {
+            if(!metricMetadata.getColumnNames().contains(new ColumnName(filterColumn))) {
+                throw new IllegalArgumentException("Column not found: " + filterColumn);
+            }
+        }
 
-//        return this.jdbcTemplate.query("SELECT DISTINCT default.\\'?'.? FROM default.? ?",
-//                ps -> {
-//                    ps.setString(0, metricName);
-//                    ps.setString(1, column);
-//                    ps.setString(2, metricName);
-//                    ps.setString(3, whereClause.toString());
-//                },
-//                (rs, rowNum) -> rs.getString(column)
-//        );
+        StringBuilder preparedStatement = new StringBuilder();
+        preparedStatement.append("SELECT DISTINCT "+ column +" FROM ?");
+        if (!sortedFilters.isEmpty()) {
+            String collected = sortedFilters.entrySet()
+                    .stream()
+                    .map(kv -> kv.getKey() + " = ?")
+                    .collect(Collectors.joining(" and "));
+            preparedStatement.append(" WHERE ").append(collected);
+        }
+
+        return this.jdbcTemplate.query(preparedStatement.toString(),
+                ps -> {
+                    int index = 1;
+                    ps.setString(index++, metricName);
+                    for (Map.Entry<String, Object> entry : sortedFilters.entrySet()) {
+                        ps.setString(index++, entry.getValue().toString());
+                    }
+                },
+                (rs, rowNum) -> rs.getString(1)
+        );
     }
 }

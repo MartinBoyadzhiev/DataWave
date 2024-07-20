@@ -18,14 +18,9 @@ public class ClickHouseController {
         this.clickHouseService = clickHouseService;
     }
 
-    @GetMapping("/metric")
-    public List<PriceMetricRecord> getMetricByJDBC() {
-        return this.clickHouseService.getMetricByJdbc();
-    }
-
     @GetMapping("/metric/{metricName}/data")
     public List<PriceMetricRecord> getMetric(@PathVariable("metricName") String metricName) {
-        return this.clickHouseService.getMetric(metricName);
+        return this.clickHouseService.getMetricData(metricName);
     }
 
     @GetMapping("/metric/{metricName}/columns")
