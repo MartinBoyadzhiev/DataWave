@@ -47,41 +47,57 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
     @Override
     public List<String> getFilteredValues(String metricName, String column, Map<String, Object> webFilter) {
-
         Map<String, Object> sortedFilters = new TreeMap<>(webFilter);
+        validateMetricAndColumnNames(metricName, column, sortedFilters);
+        StringBuilder query = buildColumnValuesPreparedStatement(metricName, column, sortedFilters);
+        return executeColumnValuesPreparedStatement(sortedFilters, query);
+    }
+
+    private void validateMetricAndColumnNames(String metricName, String column, Map<String, Object> webFilter) {
 
         Optional<MetricMetadataEntity> optionalMetricMetadata = metricMetadataRepository.findByMetricName(metricName);
-        if(optionalMetricMetadata.isEmpty()) {
+
+        if (optionalMetricMetadata.isEmpty()) {
             throw new IllegalArgumentException("Metric not found");
         }
+
         MetricMetadataEntity metricMetadata = optionalMetricMetadata.get();
 
-        if(!metricMetadata.getColumnNames().contains(new ColumnName(column))) {
+        if (!metricMetadata.getColumnNames().contains(new ColumnName(column))) {
             throw new IllegalArgumentException("Column not found: " + column);
         }
 
         for (String filterColumn : webFilter.keySet()) {
-            if(!metricMetadata.getColumnNames().contains(new ColumnName(filterColumn))) {
+            if (!metricMetadata.getColumnNames().contains(new ColumnName(filterColumn))) {
                 throw new IllegalArgumentException("Column not found: " + filterColumn);
             }
         }
 
-        StringBuilder preparedStatement = new StringBuilder();
-        preparedStatement.append("SELECT DISTINCT "+ column +" FROM ?");
+    }
+
+    private StringBuilder buildColumnValuesPreparedStatement(String metricName, String column, Map<String, Object> sortedFilters) {
+
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT DISTINCT ").append(column).append(" FROM ").append(metricName);
+
         if (!sortedFilters.isEmpty()) {
-            String collected = sortedFilters.entrySet()
+            String conditions = sortedFilters.entrySet()
                     .stream()
-                    .map(kv -> kv.getKey() + " = ?")
-                    .collect(Collectors.joining(" and "));
-            preparedStatement.append(" WHERE ").append(collected);
+                    .map(entry -> entry.getKey() + " = ?")
+                    .collect(Collectors.joining(" AND "));
+
+            query.append(" WHERE ").append(conditions);
         }
 
-        return this.jdbcTemplate.query(preparedStatement.toString(),
+        return query;
+    }
+
+    private List<String> executeColumnValuesPreparedStatement(Map<String, Object> sortedFilters, StringBuilder query) {
+        return this.jdbcTemplate.query(query.toString(),
                 ps -> {
                     int index = 1;
-                    ps.setString(index++, metricName);
                     for (Map.Entry<String, Object> entry : sortedFilters.entrySet()) {
-                        ps.setString(index++, entry.getValue().toString());
+                        ps.setObject(index++, entry.getValue());
                     }
                 },
                 (rs, rowNum) -> rs.getString(1)
