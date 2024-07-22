@@ -24,16 +24,17 @@ public class ClickHouseServiceImpl implements ClickHouseService {
     }
 
     @Override
-    public List<PriceMetricRecord> getMetricData(String metricName) {
+    public List<PriceMetricRecord> getMetricData(String metricName, Map<String, Object> filter) {
+//        Map<String, Object> sortedFilters = new TreeMap<>(filter);
 
-        return this.jdbcTemplate.query("SELECT * FROM ?",
-                ps -> ps.setString(1, metricName),
-                (rs, rowNum) -> new PriceMetricRecord(
-                        rs.getTimestamp("timestamp").toInstant(),
-                        rs.getFloat("value"),
-                        rs.getString("asset"),
-                        rs.getString("exchange")
-                ));
+        Optional<MetricMetadataEntity> optionalMetricMetadata = metricMetadataRepository.findByMetricName(metricName);
+        if (optionalMetricMetadata.isEmpty()) {
+            throw new IllegalArgumentException("Metric not found");
+        }
+
+        StringBuilder query = buildMetricDataPreparedStatement(metricName, filter);
+
+        return executeMetricDataPreparedStatement(filter, query);
     }
 
     @Override
@@ -75,6 +76,19 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
     }
 
+
+    private StringBuilder buildMetricDataPreparedStatement(String metricName, Map<String, Object> sortedFilters) {
+        StringBuilder query = new StringBuilder("SELECT * FROM ").append(metricName);
+        if (!sortedFilters.isEmpty()) {
+            String conditions = sortedFilters.entrySet()
+                    .stream()
+                    .map(entry -> entry.getKey() + " = ?")
+                    .collect(Collectors.joining(" AND "));
+            query.append(" WHERE ").append(conditions);
+        }
+        return query;
+    }
+
     private StringBuilder buildColumnValuesPreparedStatement(String metricName, String column, Map<String, Object> sortedFilters) {
 
         StringBuilder query = new StringBuilder();
@@ -90,6 +104,20 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         }
 
         return query;
+    }
+
+    private List<PriceMetricRecord> executeMetricDataPreparedStatement(Map<String, Object> sortedFilters, StringBuilder query) {
+        return this.jdbcTemplate.query(query.toString(),
+                ps -> {
+                    int index = 1;
+                    for (Map.Entry<String, Object> entry : sortedFilters.entrySet()) {
+                        ps.setObject(index++, entry.getValue());
+                    }
+                },
+                (rs, rowNum) -> new PriceMetricRecord(
+                        rs.getTimestamp("timestamp").toInstant(),
+                        rs.getFloat("value")
+                ));
     }
 
     private List<String> executeColumnValuesPreparedStatement(Map<String, Object> sortedFilters, StringBuilder query) {

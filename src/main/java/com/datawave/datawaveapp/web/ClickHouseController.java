@@ -18,9 +18,10 @@ public class ClickHouseController {
         this.clickHouseService = clickHouseService;
     }
 
-    @GetMapping("/metric/{metricName}/data")
-    public List<PriceMetricRecord> getMetric(@PathVariable("metricName") String metricName) {
-        return this.clickHouseService.getMetricData(metricName);
+    @GetMapping("/metric/{metricName}/data/{column}")
+    public List<PriceMetricRecord> getMetricData(@PathVariable("metricName") String metricName,
+                                             @RequestParam Map<String, Object> filter) {
+        return this.clickHouseService.getMetricData(metricName, filter);
     }
 
     @GetMapping("/metric/{metricName}/columns")
@@ -30,8 +31,8 @@ public class ClickHouseController {
 
     @GetMapping("/metric/{metricName}/values/{column}")
     public List<String> getFilteredValues(@PathVariable("metricName") String metricName,
-                                          @PathVariable("column") String column,
-                                          @RequestParam Map<String, Object> filter) {
+                                                        @PathVariable("column") String column,
+                                                        @RequestParam Map<String, Object> filter) {
         return this.clickHouseService.getFilteredValues(metricName, column, filter);
     }
 }
