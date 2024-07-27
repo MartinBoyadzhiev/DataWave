@@ -22,6 +22,27 @@ spring:
 #      password:
 #      username:
       driverClassName: com.clickhouse.jdbc.ClickHouseDriver
+#  security:
+#    filter:
+#      chain:
+#        content-negotiation:
+#          parameter-strategy: 'ignore'
+#        any-request:
+#          authorized: 'permitAll'
+#        request-matcher:
+#          path:
+#            pattern: '/api/**'
+#            authenticated: 'true'
+#    csrf:
+#      disabled: 'true'
+#    cors:
+#      configurationSource:
+#        allowedOrigins: //localhost:5173
+#        allowedMethods: '*'
+#        allowedHeaders: '*'
+#        allowCredentials: 'true'
+#        exposedHeaders: 'Authorization'
+#        maxAge: '3600'
 logging:
   level:
     org:

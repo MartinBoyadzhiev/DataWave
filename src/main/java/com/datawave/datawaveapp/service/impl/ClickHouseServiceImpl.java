@@ -1,10 +1,11 @@
 package com.datawave.datawaveapp.service.impl;
 
-import com.datawave.datawaveapp.model.dto.PriceMetricRecord;
+import com.datawave.datawaveapp.model.dto.MetricDataDTO;
 import com.datawave.datawaveapp.model.entity.ColumnName;
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
 import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
 import com.datawave.datawaveapp.service.ClickHouseService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -18,23 +19,23 @@ public class ClickHouseServiceImpl implements ClickHouseService {
     private final JdbcTemplate jdbcTemplate;
     private final MetricMetadataRepository metricMetadataRepository;
 
-    public ClickHouseServiceImpl(@Qualifier("clickTemplate") JdbcTemplate jdbcTemplate, MetricMetadataRepository metricMetadataRepository) {
+    public ClickHouseServiceImpl(@Qualifier("clickTemplate") JdbcTemplate jdbcTemplate, MetricMetadataRepository metricMetadataRepository, ModelMapper modelMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.metricMetadataRepository = metricMetadataRepository;
     }
 
     @Override
-    public List<PriceMetricRecord> getMetricData(String metricName, Map<String, Object> filter) {
-//        Map<String, Object> sortedFilters = new TreeMap<>(filter);
+    public Set<MetricDataDTO> getMetricData(String metricName, Map<String, Object> filter) {
+        Map<String, Object> sortedFilters = new TreeMap<>(filter);
 
         Optional<MetricMetadataEntity> optionalMetricMetadata = metricMetadataRepository.findByMetricName(metricName);
         if (optionalMetricMetadata.isEmpty()) {
             throw new IllegalArgumentException("Metric not found");
         }
 
-        StringBuilder query = buildMetricDataPreparedStatement(metricName, filter);
+        StringBuilder query = buildMetricDataPreparedStatement(metricName, sortedFilters);
 
-        return executeMetricDataPreparedStatement(filter, query);
+        return executeMetricDataPreparedStatement(sortedFilters, query);
     }
 
     @Override
@@ -106,18 +107,20 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         return query;
     }
 
-    private List<PriceMetricRecord> executeMetricDataPreparedStatement(Map<String, Object> sortedFilters, StringBuilder query) {
-        return this.jdbcTemplate.query(query.toString(),
+    private Set<MetricDataDTO> executeMetricDataPreparedStatement(Map<String, Object> sortedFilters, StringBuilder query) {
+        return new TreeSet<>(jdbcTemplate.query(query.toString(),
                 ps -> {
                     int index = 1;
                     for (Map.Entry<String, Object> entry : sortedFilters.entrySet()) {
                         ps.setObject(index++, entry.getValue());
                     }
                 },
-                (rs, rowNum) -> new PriceMetricRecord(
+                (rs, rowNum) -> new MetricDataDTO(
                         rs.getTimestamp("timestamp").toInstant(),
                         rs.getFloat("value")
-                ));
+                )
+        )
+        );
     }
 
     private List<String> executeColumnValuesPreparedStatement(Map<String, Object> sortedFilters, StringBuilder query) {
