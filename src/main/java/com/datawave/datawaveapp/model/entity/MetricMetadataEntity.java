@@ -12,7 +12,7 @@ public class MetricMetadataEntity extends BaseEntity {
 
     @JoinColumn(name = "metric_id", referencedColumnName = "id", nullable = false)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<ColumnName> columnNames;
+    private Set<ColumnMetadataEntity> columns;
 
     public String getMetricName() {
         return metricName;
@@ -22,11 +22,11 @@ public class MetricMetadataEntity extends BaseEntity {
         this.metricName = metricName;
     }
 
-    public Set<ColumnName> getColumnNames() {
-        return columnNames;
+    public Set<ColumnMetadataEntity> getColumnNames() {
+        return columns;
     }
 
-    public void setColumnNames(Set<ColumnName> columnNames) {
-        this.columnNames = columnNames;
+    public void setColumnNames(Set<ColumnMetadataEntity> columnNames) {
+        this.columns = columnNames;
     }
 }

@@ -16,12 +16,12 @@ import java.util.Collections;
 
 @Configuration
 public class ApplicationConfig {
-    @SuppressWarnings("deprecation")
+//    @SuppressWarnings("deprecation")
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests(
-                        authorize -> authorize.requestMatchers("/metric/**")
+                        authorize -> authorize.requestMatchers("/")
                                 .authenticated().anyRequest().permitAll())
                 .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())

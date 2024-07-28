@@ -1,6 +1,6 @@
 package com.datawave.datawaveapp;
 
-import com.datawave.datawaveapp.model.entity.ColumnName;
+import com.datawave.datawaveapp.model.entity.ColumnMetadataEntity;
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
 import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -34,8 +34,8 @@ public class DataWaveApplication implements CommandLineRunner {
 
         MetricMetadataEntity metricMetadata = new MetricMetadataEntity();
         metricMetadata.setMetricName("metric_price");
-        metricMetadata.setColumnNames(Set.of(new ColumnName("timestamp"), new ColumnName("value"),
-                new ColumnName("asset"), new ColumnName("exchange"))
+        metricMetadata.setColumnNames(Set.of(new ColumnMetadataEntity("timestamp"), new ColumnMetadataEntity("value"),
+                new ColumnMetadataEntity("asset"), new ColumnMetadataEntity("exchange"))
         );
         metricMetadataRepository.save(metricMetadata);
 
