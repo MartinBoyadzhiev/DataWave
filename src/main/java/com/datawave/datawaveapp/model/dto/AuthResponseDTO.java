@@ -1,6 +1,6 @@
 package com.datawave.datawaveapp.model.dto;
 
-public class AuthResponse {
+public class AuthResponseDTO {
     private String jwt;
     private String message;
     private Boolean status;
