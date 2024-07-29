@@ -73,13 +73,17 @@ public class UserEntityServiceImpl implements UserEntityService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = JwtProvider.generateToken(authentication);
-        AuthResponseDTO authResponseDTO = new AuthResponseDTO();
+        AuthResponseDTO authResponse = new AuthResponseDTO();
 
-        authResponseDTO.setMessage("Login success");
-        authResponseDTO.setJwt(token);
-        authResponseDTO.setStatus(true);
+        Optional<UserEntity> optionalUser = userRepository.findByEmail(username);
+        boolean isAdmin = optionalUser.isPresent() && "ROLE_ADMIN".equals(optionalUser.get().getRole());
 
-        return new ResponseEntity<>(authResponseDTO, HttpStatus.OK);
+        authResponse.setMessage("Login success");
+        authResponse.setJwt(token);
+        authResponse.setStatus(true);
+        authResponse.setAdmin(isAdmin);
+
+        return new ResponseEntity<>(authResponse, HttpStatus.OK);
     }
 
     private Authentication authenticate(String username, String password) {

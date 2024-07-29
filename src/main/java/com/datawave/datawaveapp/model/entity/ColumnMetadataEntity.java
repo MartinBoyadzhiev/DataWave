@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import java.util.Objects;
 
 @Entity
-@Table(name = "metric_columns")
+@Table(name = "column_metadata")
 public class ColumnMetadataEntity extends BaseEntity {
     @Column
     private String name;

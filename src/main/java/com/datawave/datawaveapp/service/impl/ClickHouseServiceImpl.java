@@ -8,7 +8,6 @@ import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
 import com.datawave.datawaveapp.repository.mysqlRepositories.ColumnMetadataRepository;
 import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
 import com.datawave.datawaveapp.service.ClickHouseService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ClickHouseServiceImpl implements ClickHouseService {
-
+//    TODO: MetadataService metadataService;
     private final JdbcTemplate jdbcTemplate;
     private final MetricMetadataRepository metricMetadataRepository;
     private final ColumnMetadataRepository columnMetadataRepository;
@@ -51,7 +50,9 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         MetricMetadataEntity metricMetadata = this.metricMetadataRepository.findByMetricName(metricName)
                 .orElseThrow(() -> new IllegalArgumentException("Metric not found"));
 
-        return metricMetadata.getColumnNames().stream().map(ColumnMetadataEntity::getName).collect(Collectors.toList());
+        return metricMetadata.getColumns().stream()
+                .map(ColumnMetadataEntity::getName)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -77,27 +78,33 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
         MetricMetadataEntity metricMetadata = new MetricMetadataEntity();
         metricMetadata.setMetricName(metricName);
-        metricMetadata.setColumnNames(columns.keySet().stream().map(k -> {
+        //FIXME: The method is setting only the column names, but not the types
+        Set<ColumnMetadataEntity> columnMetadataEntitySet = new HashSet<>();
+        columns.forEach((k, v) -> {
             ColumnMetadataEntity columnName = new ColumnMetadataEntity();
             columnName.setName(k);
-            return columnName;
-        }).collect(Collectors.toSet()));
+            columnName.setType(v);
+            columnMetadataEntitySet.add(columnName);
+        });
+        metricMetadata.setColumnNames(columnMetadataEntitySet);
 
         ColumnMetadataEntity timestampMetadata = new ColumnMetadataEntity("timestamp");
         timestampMetadata.setType("DateTime");
-        metricMetadata.getColumnNames().add(timestampMetadata);
+
         ColumnMetadataEntity valueMetadata = new ColumnMetadataEntity("value");
         valueMetadata.setType(valueType);
-        metricMetadata.getColumnNames().add(valueMetadata);
 
-        this.columnMetadataRepository.saveAll(metricMetadata.getColumnNames());
+        metricMetadata.getColumns().add(timestampMetadata);
+        metricMetadata.getColumns().add(valueMetadata);
 
-//      FIXME: SQL Injection vulnerability
+        this.metricMetadataRepository.save(metricMetadata);
+        this.columnMetadataRepository.saveAll(metricMetadata.getColumns());
+
+
         StringBuilder query = new StringBuilder(buildCreateTableQuery(metricName, valueType, columns, primaryKeys));
 
         this.jdbcTemplate.execute(query.toString());
 
-        this.metricMetadataRepository.save(metricMetadata);
 
         return new ResponseEntity<>(new BasicResponseDTO("Table created successfully", true), HttpStatus.CREATED);
     }
@@ -111,7 +118,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
                 .map(entry -> entry.getKey() + " " + entry.getValue())
                 .collect(Collectors.joining(", "));
         String keys = primaryKeys.stream().collect(Collectors.joining(", "));
-        query.append(fields).append(") ENGINE = MergeTree() PRIMARY KEY (").append(keys).append(");");
+        query.append(fields).append(") ENGINE = MergeTree() PRIMARY KEY (timestamp, ").append(keys).append(");");
         return query.toString();
     }
 
@@ -125,12 +132,12 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
         MetricMetadataEntity metricMetadata = optionalMetricMetadata.get();
 
-        if (!metricMetadata.getColumnNames().contains(new ColumnMetadataEntity(column))) {
+        if (!metricMetadata.getColumns().contains(new ColumnMetadataEntity(column))) {
             throw new IllegalArgumentException("Column not found: " + column);
         }
 
         for (String filterColumn : webFilter.keySet()) {
-            if (!metricMetadata.getColumnNames().contains(new ColumnMetadataEntity(filterColumn))) {
+            if (!metricMetadata.getColumns().contains(new ColumnMetadataEntity(filterColumn))) {
                 throw new IllegalArgumentException("Column not found: " + filterColumn);
             }
         }

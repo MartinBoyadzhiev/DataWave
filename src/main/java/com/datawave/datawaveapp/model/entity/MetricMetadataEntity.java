@@ -22,7 +22,7 @@ public class MetricMetadataEntity extends BaseEntity {
         this.metricName = metricName;
     }
 
-    public Set<ColumnMetadataEntity> getColumnNames() {
+    public Set<ColumnMetadataEntity> getColumns() {
         return columns;
     }
 
