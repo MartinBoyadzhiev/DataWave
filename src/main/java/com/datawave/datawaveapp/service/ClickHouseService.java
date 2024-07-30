@@ -18,4 +18,6 @@ public interface ClickHouseService {
     List<String> getFilteredValues(String metricName, String column, Map<String, Object> filter);
 
     ResponseEntity<BasicResponseDTO> createTable(CreateTableDTO createTableData);
+
+    ResponseEntity<BasicResponseDTO> deleteTable(String metricName);
 }

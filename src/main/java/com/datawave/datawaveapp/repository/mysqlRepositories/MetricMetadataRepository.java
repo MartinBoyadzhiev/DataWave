@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface MetricMetadataRepository extends JpaRepository<MetricMetadataEntity, Long> {
 
     Optional<MetricMetadataEntity> findByMetricName(String metricName);
+    int deleteByMetricName(String metricName);
 }

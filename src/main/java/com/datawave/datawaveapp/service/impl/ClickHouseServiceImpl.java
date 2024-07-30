@@ -8,33 +8,34 @@ import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
 import com.datawave.datawaveapp.repository.mysqlRepositories.ColumnMetadataRepository;
 import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
 import com.datawave.datawaveapp.service.ClickHouseService;
+import com.datawave.datawaveapp.service.MetricMetadataService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class ClickHouseServiceImpl implements ClickHouseService {
-//    TODO: MetadataService metadataService;
     private final JdbcTemplate jdbcTemplate;
-    private final MetricMetadataRepository metricMetadataRepository;
     private final ColumnMetadataRepository columnMetadataRepository;
+    private final MetricMetadataService metricMetadataService;
 
-    public ClickHouseServiceImpl(@Qualifier("clickTemplate") JdbcTemplate jdbcTemplate, MetricMetadataRepository metricMetadataRepository, ColumnMetadataRepository columnMetadataRepository) {
+    public ClickHouseServiceImpl(@Qualifier("clickTemplate") JdbcTemplate jdbcTemplate, ColumnMetadataRepository columnMetadataRepository, MetricMetadataService metricMetadataService) {
         this.jdbcTemplate = jdbcTemplate;
-        this.metricMetadataRepository = metricMetadataRepository;
         this.columnMetadataRepository = columnMetadataRepository;
+        this.metricMetadataService = metricMetadataService;
     }
 
     @Override
     public Set<MetricDataDTO> getMetricData(String metricName, Map<String, Object> filter) {
         Map<String, Object> sortedFilters = new TreeMap<>(filter);
 
-        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataRepository.findByMetricName(metricName);
+        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(metricName);
         if (optionalMetricMetadata.isEmpty()) {
             throw new IllegalArgumentException("Metric not found");
         }
@@ -47,7 +48,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
     @Override
     public List<String> getColumns(String metricName) {
 
-        MetricMetadataEntity metricMetadata = this.metricMetadataRepository.findByMetricName(metricName)
+        MetricMetadataEntity metricMetadata = this.metricMetadataService.getByMetricName(metricName)
                 .orElseThrow(() -> new IllegalArgumentException("Metric not found"));
 
         return metricMetadata.getColumns().stream()
@@ -71,14 +72,14 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         Map<String, String> columns = createTableData.getColumns();
         List<String> primaryKeys = createTableData.getPrimaryKeys();
 
-        if (this.metricMetadataRepository.findByMetricName(metricName).isPresent()) {
+        if (this.metricMetadataService.getByMetricName(metricName).isPresent()) {
             return new ResponseEntity<>(new BasicResponseDTO("Table already exists", false),
                     HttpStatus.CONFLICT);
         }
 
         MetricMetadataEntity metricMetadata = new MetricMetadataEntity();
         metricMetadata.setMetricName(metricName);
-        //FIXME: The method is setting only the column names, but not the types
+
         Set<ColumnMetadataEntity> columnMetadataEntitySet = new HashSet<>();
         columns.forEach((k, v) -> {
             ColumnMetadataEntity columnName = new ColumnMetadataEntity();
@@ -97,16 +98,32 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         metricMetadata.getColumns().add(timestampMetadata);
         metricMetadata.getColumns().add(valueMetadata);
 
-        this.metricMetadataRepository.save(metricMetadata);
+        this.metricMetadataService.save(metricMetadata);
         this.columnMetadataRepository.saveAll(metricMetadata.getColumns());
-
 
         StringBuilder query = new StringBuilder(buildCreateTableQuery(metricName, valueType, columns, primaryKeys));
 
         this.jdbcTemplate.execute(query.toString());
 
-
         return new ResponseEntity<>(new BasicResponseDTO("Table created successfully", true), HttpStatus.CREATED);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<BasicResponseDTO> deleteTable(String metricName) {
+        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(metricName);
+        if (optionalMetricMetadata.isEmpty()) {
+            return new ResponseEntity<>(new BasicResponseDTO("Table not found", false),
+                    HttpStatus.NOT_FOUND);
+        }
+        MetricMetadataEntity metricMetadataEntity = optionalMetricMetadata.get();
+
+
+        this.metricMetadataService.deleteByMetricName(metricName);
+
+        this.jdbcTemplate.execute("DROP TABLE default." + metricName);
+
+        return new ResponseEntity<>(new BasicResponseDTO("Table deleted successfully", true), HttpStatus.OK);
     }
 
     private String buildCreateTableQuery(String metricName, String valueType, Map<String, String> columns, List<String> primaryKeys) {
@@ -124,7 +141,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
     private void validateMetricAndColumnNames(String metricName, String column, Map<String, Object> webFilter) {
 
-        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataRepository.findByMetricName(metricName);
+        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(metricName);
 
         if (optionalMetricMetadata.isEmpty()) {
             throw new IllegalArgumentException("Metric not found");
@@ -141,7 +158,6 @@ public class ClickHouseServiceImpl implements ClickHouseService {
                 throw new IllegalArgumentException("Column not found: " + filterColumn);
             }
         }
-
     }
 
     private StringBuilder buildMetricDataPreparedStatement(String metricName, Map<String, Object> sortedFilters) {
@@ -169,7 +185,6 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
             query.append(" WHERE ").append(conditions);
         }
-
         return query;
     }
 

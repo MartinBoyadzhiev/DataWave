@@ -37,8 +37,14 @@ public class ClickHouseController {
                                                         @RequestParam Map<String, Object> filter) {
         return this.clickHouseService.getFilteredValues(metricName, column, filter);
     }
+
     @PostMapping("/metric/create")
     public ResponseEntity<BasicResponseDTO> createTable(@RequestBody CreateTableDTO createTableData) {
         return this.clickHouseService.createTable(createTableData);
+    }
+
+    @DeleteMapping("/metric/delete")
+    public ResponseEntity<BasicResponseDTO> deleteTable(@RequestParam String metricName) {
+        return this.clickHouseService.deleteTable(metricName);
     }
 }
