@@ -3,7 +3,9 @@ package com.datawave.datawaveapp.web;
 import com.datawave.datawaveapp.model.dto.BasicResponseDTO;
 import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.dto.MetricDataDTO;
+import com.datawave.datawaveapp.model.dto.MetricOverviewDTO;
 import com.datawave.datawaveapp.service.ClickHouseService;
+import com.datawave.datawaveapp.service.MetricMetadataService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,11 +17,17 @@ import java.util.Set;
 public class ClickHouseController {
 
     private final ClickHouseService clickHouseService;
+    private final MetricMetadataService metricMetadataService;
 
-    public ClickHouseController(ClickHouseService clickHouseService) {
+    public ClickHouseController(ClickHouseService clickHouseService, MetricMetadataService metricMetadataService) {
         this.clickHouseService = clickHouseService;
+        this.metricMetadataService = metricMetadataService;
     }
 
+    @GetMapping("/metric/overview")
+    public Set<MetricOverviewDTO> getMetricOverview() {
+        return this.metricMetadataService.getAllMetricOverview();
+    }
     @GetMapping("/metric/{metricName}/data")
     public Set<MetricDataDTO> getMetricData(@PathVariable("metricName") String metricName,
                                             @RequestParam Map<String, Object> filter) {
