@@ -14,8 +14,8 @@ spring:
   datasource:
     mysql:
       url: jdbc:mysql://localhost:3506/datawave?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC
-      username: ${db_username}
-      password: ${db_password}
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
       driverClassName: com.mysql.cj.jdbc.Driver
     clickhouse:
       url: jdbc:ch://localhost:8123/default
@@ -54,3 +54,4 @@ logging:
     blog: WARN
 server:
   port: 8080
+jwt.secret: ${JWT_SECRET}

@@ -115,9 +115,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         if (optionalMetricMetadata.isEmpty()) {
             return new ResponseEntity<>(new BasicResponseDTO("Table not found", false),
                     HttpStatus.NOT_FOUND);
-        }
-        MetricMetadataEntity metricMetadataEntity = optionalMetricMetadata.get();
-
+        };
 
         this.metricMetadataService.deleteByMetricName(metricName);
 
@@ -127,6 +125,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
     }
 
     private String buildCreateTableQuery(String metricName, String valueType, Map<String, String> columns, List<String> primaryKeys) {
+//        FIXME: This is a SQL injection vulnerability
         StringBuilder query = new StringBuilder();
         query.append("CREATE TABLE default.").append(metricName)
                 .append(" (timestamp DateTime, value ").append(valueType)

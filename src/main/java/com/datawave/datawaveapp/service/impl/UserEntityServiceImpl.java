@@ -7,6 +7,7 @@ import com.datawave.datawaveapp.model.dto.SignUpDTO;
 import com.datawave.datawaveapp.model.entity.UserEntity;
 import com.datawave.datawaveapp.repository.mysqlRepositories.UserRepository;
 import com.datawave.datawaveapp.service.UserEntityService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,11 +27,17 @@ public class UserEntityServiceImpl implements UserEntityService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final JwtProvider jwtProvider;
 
-    public UserEntityServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+
+    public UserEntityServiceImpl(UserRepository userRepository,
+                                 PasswordEncoder passwordEncoder,
+                                 UserDetailsService userDetailsService,
+                                 @Value("${jwt.secret}") String secret) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
+        this.jwtProvider = new JwtProvider(secret);
     }
 
     @Override
@@ -54,7 +61,7 @@ public class UserEntityServiceImpl implements UserEntityService {
         userRepository.save(savedUser);
         Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = JwtProvider.generateToken(authentication);
+        String token = this.jwtProvider.generateToken(authentication);
 
 
         AuthResponseDTO authResponseDTO = new AuthResponseDTO();
@@ -72,7 +79,7 @@ public class UserEntityServiceImpl implements UserEntityService {
         Authentication authentication = authenticate(username, password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token = JwtProvider.generateToken(authentication);
+        String token = this.jwtProvider.generateToken(authentication);
         AuthResponseDTO authResponse = new AuthResponseDTO();
 
         Optional<UserEntity> optionalUser = userRepository.findByEmail(username);

@@ -13,9 +13,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class JwtProvider {
-    static SecretKey key = Keys.hmacShaKeyFor(JwtConstant.SECRET_KEY.getBytes());
 
-    public static String generateToken(Authentication auth) {
+    private final SecretKey key;
+
+    public JwtProvider(String key) {
+       this.key = Keys.hmacShaKeyFor(key.getBytes());
+    }
+
+    public String generateToken(Authentication auth) {
         Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
         String roles = populateAuthorities(authorities);
 //        @SuppressWarnings("deprecation")
@@ -31,7 +36,7 @@ public class JwtProvider {
 
     }
 
-    private static String populateAuthorities(Collection<? extends GrantedAuthority> authorities) {
+    private String populateAuthorities(Collection<? extends GrantedAuthority> authorities) {
         Set<String> auths = new HashSet<>();
         for(GrantedAuthority authority: authorities) {
             auths.add(authority.getAuthority());
@@ -41,7 +46,7 @@ public class JwtProvider {
 
 
 //    @SuppressWarnings("deprecation")
-    public static String getEmailFromJwtToken(String jwt) {
+    public String getEmailFromJwtToken(String jwt) {
         jwt = jwt.substring(7);
         try {
             Claims claims=Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
