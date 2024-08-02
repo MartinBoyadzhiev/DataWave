@@ -6,6 +6,8 @@ import com.datawave.datawaveapp.model.dto.MetricDataDTO;
 import com.datawave.datawaveapp.model.dto.MetricOverviewDTO;
 import com.datawave.datawaveapp.service.ClickHouseService;
 import com.datawave.datawaveapp.service.MetricMetadataService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,12 +49,14 @@ public class ClickHouseController {
     }
 
     @PostMapping("/metric/create")
-    public ResponseEntity<BasicResponseDTO> createTable(@RequestBody CreateTableDTO createTableData) {
+    public ResponseEntity<BasicResponseDTO> createTable(@Valid @RequestBody CreateTableDTO createTableData) {
         return this.clickHouseService.createTable(createTableData);
     }
 
     @DeleteMapping("/metric/delete")
-    public ResponseEntity<BasicResponseDTO> deleteTable(@RequestParam String metricName) {
+    public ResponseEntity<BasicResponseDTO> deleteTable(@Valid
+                                                        @Pattern (regexp = "^[a-zA-Z0-9]*$")
+                                                        @RequestParam String metricName) {
         return this.clickHouseService.deleteTable(metricName);
     }
 }

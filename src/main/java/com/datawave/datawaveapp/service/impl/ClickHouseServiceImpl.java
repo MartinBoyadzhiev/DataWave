@@ -5,8 +5,8 @@ import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.dto.MetricDataDTO;
 import com.datawave.datawaveapp.model.entity.ColumnMetadataEntity;
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
+import com.datawave.datawaveapp.model.entity.ValueTypeEnum;
 import com.datawave.datawaveapp.repository.mysqlRepositories.ColumnMetadataRepository;
-import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
 import com.datawave.datawaveapp.service.ClickHouseService;
 import com.datawave.datawaveapp.service.MetricMetadataService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,22 +33,24 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
     @Override
     public Set<MetricDataDTO> getMetricData(String metricName, Map<String, Object> filter) {
+        String mappedMetricName = "metric_" + metricName;
         Map<String, Object> sortedFilters = new TreeMap<>(filter);
 
-        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(metricName);
+        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(mappedMetricName);
         if (optionalMetricMetadata.isEmpty()) {
             throw new IllegalArgumentException("Metric not found");
         }
 
-        StringBuilder query = buildMetricDataPreparedStatement(metricName, sortedFilters);
+        StringBuilder query = buildMetricDataPreparedStatement(mappedMetricName, sortedFilters);
 
         return executeMetricDataPreparedStatement(sortedFilters, query);
     }
 
     @Override
     public List<String> getColumns(String metricName) {
+        String mappedMetricName = "metric_" + metricName;
 
-        MetricMetadataEntity metricMetadata = this.metricMetadataService.getByMetricName(metricName)
+        MetricMetadataEntity metricMetadata = this.metricMetadataService.getByMetricName(mappedMetricName)
                 .orElseThrow(() -> new IllegalArgumentException("Metric not found"));
 
         return metricMetadata.getColumns().stream()
@@ -58,9 +60,11 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
     @Override
     public List<String> getFilteredValues(String metricName, String column, Map<String, Object> webFilter) {
+        String mappedMetricName = "metric_" + metricName;
+
         Map<String, Object> sortedFilters = new TreeMap<>(webFilter);
-        validateMetricAndColumnNames(metricName, column, sortedFilters);
-        StringBuilder query = buildColumnValuesPreparedStatement(metricName, column, sortedFilters);
+        validateMetricAndColumnNames(mappedMetricName, column, sortedFilters);
+        StringBuilder query = buildColumnValuesPreparedStatement(mappedMetricName, column, sortedFilters);
         return executeColumnValuesPreparedStatement(sortedFilters, query);
     }
 
@@ -68,11 +72,13 @@ public class ClickHouseServiceImpl implements ClickHouseService {
     public ResponseEntity<BasicResponseDTO> createTable(CreateTableDTO createTableData) {
 
         String metricName = createTableData.getMetricName();
-        String valueType = createTableData.getValueType();
-        Map<String, String> columns = createTableData.getColumns();
+        String mappedMetricName = "metric_" + metricName;
+
+        ValueTypeEnum valueType = createTableData.getValueType();
+        Map<String, ValueTypeEnum> columns = createTableData.getColumns();
         List<String> primaryKeys = createTableData.getPrimaryKeys();
 
-        if (this.metricMetadataService.getByMetricName(metricName).isPresent()) {
+        if (this.metricMetadataService.getByMetricName(mappedMetricName).isPresent()) {
             return new ResponseEntity<>(new BasicResponseDTO("Table already exists", false),
                     HttpStatus.CONFLICT);
         }
@@ -90,7 +96,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         metricMetadata.setColumnNames(columnMetadataEntitySet);
 
         ColumnMetadataEntity timestampMetadata = new ColumnMetadataEntity("timestamp");
-        timestampMetadata.setType("DateTime");
+        timestampMetadata.setType(ValueTypeEnum.TIMESTAMP);
 
         ColumnMetadataEntity valueMetadata = new ColumnMetadataEntity("value");
         valueMetadata.setType(valueType);
@@ -101,16 +107,17 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         this.metricMetadataService.save(metricMetadata);
         this.columnMetadataRepository.saveAll(metricMetadata.getColumns());
 
-        StringBuilder query = new StringBuilder(buildCreateTableQuery(metricName, valueType, columns, primaryKeys));
+        StringBuilder query = new StringBuilder(buildCreateTableQuery(mappedMetricName, valueType.getValue(), columns, primaryKeys));
 
         this.jdbcTemplate.execute(query.toString());
 
-        return new ResponseEntity<>(new BasicResponseDTO("Table created successfully", true), HttpStatus.CREATED);
+        return new ResponseEntity<>(new BasicResponseDTO("Table created successfully.", true), HttpStatus.CREATED);
     }
 
     @Override
     @Transactional
     public ResponseEntity<BasicResponseDTO> deleteTable(String metricName) {
+        String mappedMetricName = "metric_" + metricName;
         Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(metricName);
         if (optionalMetricMetadata.isEmpty()) {
             return new ResponseEntity<>(new BasicResponseDTO("Table not found", false),
@@ -119,12 +126,12 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
         this.metricMetadataService.deleteByMetricName(metricName);
 
-        this.jdbcTemplate.execute("DROP TABLE default." + metricName);
+        this.jdbcTemplate.execute("DROP TABLE default." + mappedMetricName);
 
         return new ResponseEntity<>(new BasicResponseDTO("Table deleted successfully", true), HttpStatus.OK);
     }
 
-    private String buildCreateTableQuery(String metricName, String valueType, Map<String, String> columns, List<String> primaryKeys) {
+    private String buildCreateTableQuery(String metricName, String valueType, Map<String, ValueTypeEnum> columns, List<String> primaryKeys) {
 //        FIXME: This is a SQL injection vulnerability
         StringBuilder query = new StringBuilder();
         query.append("CREATE TABLE default.").append(metricName)

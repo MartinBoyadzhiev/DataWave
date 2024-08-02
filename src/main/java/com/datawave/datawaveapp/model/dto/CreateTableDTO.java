@@ -1,14 +1,18 @@
 package com.datawave.datawaveapp.model.dto;
 
+import com.datawave.datawaveapp.model.entity.ValueTypeEnum;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+
 import java.util.List;
 import java.util.Map;
 
 public class CreateTableDTO {
-
+    @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "Metric name must be alphanumeric.")
     private String metricName;
 //    TODO: Change valueType to enum
-    private String valueType;
-    private Map<String, String> columns;
+    private ValueTypeEnum valueType;
+    private Map<String, ValueTypeEnum> columns;
     private List<String> primaryKeys;
 
     public String getMetricName() {
@@ -19,19 +23,19 @@ public class CreateTableDTO {
         this.metricName = metricName;
     }
 
-    public String getValueType() {
+    public ValueTypeEnum getValueType() {
         return valueType;
     }
 
-    public void setValueType(String valueType) {
+    public void setValueType(ValueTypeEnum valueType) {
         this.valueType = valueType;
     }
 
-    public Map<String, String> getColumns() {
+    public Map<String, ValueTypeEnum> getColumns() {
         return columns;
     }
 
-    public void setColumns(Map<String, String> columns) {
+    public void setColumns(Map<String, ValueTypeEnum> columns) {
         this.columns = columns;
     }
 

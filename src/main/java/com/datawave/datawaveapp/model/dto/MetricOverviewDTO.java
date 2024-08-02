@@ -1,11 +1,14 @@
 package com.datawave.datawaveapp.model.dto;
 
+import com.datawave.datawaveapp.model.entity.ValueTypeEnum;
+
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+
 
 public class MetricOverviewDTO {
     private String metricName;
-    private Set<String> columns;
+    private Map<String, ValueTypeEnum> columns;
 
     public String getMetricName() {
         return metricName;
@@ -15,11 +18,11 @@ public class MetricOverviewDTO {
         this.metricName = metricName;
     }
 
-    public Set<String> getColumns() {
+    public Map<String, ValueTypeEnum> getColumns() {
         return columns;
     }
 
-    public void setColumns(Set<String> columns) {
+    public void setColumns(Map<String, ValueTypeEnum> columns) {
         this.columns = columns;
     }
 

@@ -1,8 +1,7 @@
 package com.datawave.datawaveapp.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
 @Entity
@@ -11,7 +10,8 @@ public class ColumnMetadataEntity extends BaseEntity {
     @Column
     private String name;
     @Column
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private ValueTypeEnum type;
 
     public ColumnMetadataEntity() {
     }
@@ -27,11 +27,11 @@ public class ColumnMetadataEntity extends BaseEntity {
         this.name = name;
     }
 
-    public String getType() {
+    public ValueTypeEnum getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(ValueTypeEnum type) {
         this.type = type;
     }
 

@@ -49,8 +49,7 @@ public class MetricMetadataServiceImpl implements MetricMetadataService {
                     metricOverviewDTO.setMetricName(m.getMetricName());
                     metricOverviewDTO.setColumns(m.getColumns()
                             .stream()
-                            .map(ColumnMetadataEntity::getName)
-                            .collect(Collectors.toSet()));
+                            .collect(Collectors.toMap(ColumnMetadataEntity::getName, ColumnMetadataEntity::getType)));
                     return metricOverviewDTO;
                 })
                 .collect(Collectors.toSet());
