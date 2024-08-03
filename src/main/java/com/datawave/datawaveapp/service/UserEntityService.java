@@ -6,6 +6,6 @@ import com.datawave.datawaveapp.model.dto.SignUpDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface UserEntityService {
-    ResponseEntity<AuthResponseDTO> doLogin(LoginDTO loginRequest);
-    ResponseEntity<AuthResponseDTO> doRegister(SignUpDTO user) throws Exception;
+    ResponseEntity<AuthResponseDTO> login(LoginDTO loginRequest);
+    ResponseEntity<AuthResponseDTO> register(SignUpDTO user) throws Exception;
 }

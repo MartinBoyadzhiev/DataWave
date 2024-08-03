@@ -22,11 +22,11 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDTO> createUserHandler(@RequestBody SignUpDTO user) throws Exception {
-        return userService.doRegister(user);
+        return userService.register(user);
     }
 
     @PostMapping("/signin")
     public ResponseEntity<AuthResponseDTO> signIn(@RequestBody LoginDTO loginRequest) {
-        return userService.doLogin(loginRequest);
+        return userService.login(loginRequest);
     }
 }

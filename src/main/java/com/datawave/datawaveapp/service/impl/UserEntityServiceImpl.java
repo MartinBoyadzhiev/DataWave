@@ -41,7 +41,7 @@ public class UserEntityServiceImpl implements UserEntityService {
     }
 
     @Override
-    public ResponseEntity<AuthResponseDTO> doRegister(SignUpDTO user) throws Exception {
+    public ResponseEntity<AuthResponseDTO> register(SignUpDTO user) throws Exception {
         String email = user.getEmail();
         String password = user.getPassword();
         String role = user.getRole();
@@ -72,7 +72,7 @@ public class UserEntityServiceImpl implements UserEntityService {
     }
 
     @Override
-    public ResponseEntity<AuthResponseDTO> doLogin(LoginDTO loginRequest) {
+    public ResponseEntity<AuthResponseDTO> login(LoginDTO loginRequest) {
         String username = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
