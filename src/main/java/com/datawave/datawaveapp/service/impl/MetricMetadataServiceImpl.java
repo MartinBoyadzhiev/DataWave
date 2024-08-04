@@ -56,4 +56,9 @@ public class MetricMetadataServiceImpl implements MetricMetadataService {
 
         return result;
     }
+
+    @Override
+    public MetricMetadataEntity getMetricMetadataByName(String metricName) {
+        return this.metricMetadataRepository.findByMetricName(metricName).orElse(null);
+    }
 }

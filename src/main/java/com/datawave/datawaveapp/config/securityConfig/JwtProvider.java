@@ -3,21 +3,23 @@ package com.datawave.datawaveapp.config.securityConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
+@Component
 public class JwtProvider {
 
     private final SecretKey key;
 
-    public JwtProvider(String key) {
-       this.key = Keys.hmacShaKeyFor(key.getBytes());
+    public JwtProvider(@Value("${jwt.secret}") String secret) {
+       this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public String generateToken(Authentication auth) {
@@ -51,12 +53,9 @@ public class JwtProvider {
         try {
             Claims claims=Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
             String email = String.valueOf(claims.get("email"));
-            System.out.println("Email extracted from JWT: " + claims);
             return email;
         } catch (Exception e) {
-            System.err.println("Error extracting email from JWT: " + e.getMessage());
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException("Invalid token");
         }
     }
 

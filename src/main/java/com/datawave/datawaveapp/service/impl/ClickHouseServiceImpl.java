@@ -1,14 +1,14 @@
 package com.datawave.datawaveapp.service.impl;
 
+import com.datawave.datawaveapp.config.securityConfig.JwtProvider;
 import com.datawave.datawaveapp.model.dto.BasicResponseDTO;
 import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.dto.MetricDataDTO;
-import com.datawave.datawaveapp.model.entity.ColumnMetadataEntity;
-import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
-import com.datawave.datawaveapp.model.entity.ValueTypeEnum;
+import com.datawave.datawaveapp.model.entity.*;
 import com.datawave.datawaveapp.repository.mysqlRepositories.ColumnMetadataRepository;
 import com.datawave.datawaveapp.service.ClickHouseService;
 import com.datawave.datawaveapp.service.MetricMetadataService;
+import com.datawave.datawaveapp.service.UserEntityService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +24,15 @@ public class ClickHouseServiceImpl implements ClickHouseService {
     private final JdbcTemplate jdbcTemplate;
     private final ColumnMetadataRepository columnMetadataRepository;
     private final MetricMetadataService metricMetadataService;
+    private final UserEntityService userService;
+    private final JwtProvider jwtProvider;
 
-    public ClickHouseServiceImpl(@Qualifier("clickTemplate") JdbcTemplate jdbcTemplate, ColumnMetadataRepository columnMetadataRepository, MetricMetadataService metricMetadataService) {
+    public ClickHouseServiceImpl(@Qualifier("clickTemplate") JdbcTemplate jdbcTemplate, ColumnMetadataRepository columnMetadataRepository, MetricMetadataService metricMetadataService, UserEntityService userService, JwtProvider jwtProvider) {
         this.jdbcTemplate = jdbcTemplate;
         this.columnMetadataRepository = columnMetadataRepository;
         this.metricMetadataService = metricMetadataService;
+        this.userService = userService;
+        this.jwtProvider = jwtProvider;
     }
 
     @Override
@@ -93,7 +97,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
             columnName.setType(v);
             columnMetadataEntitySet.add(columnName);
         });
-        metricMetadata.setColumnNames(columnMetadataEntitySet);
+        metricMetadata.setColumns(columnMetadataEntitySet);
 
         ColumnMetadataEntity timestampMetadata = new ColumnMetadataEntity("timestamp");
         timestampMetadata.setType(ValueTypeEnum.TIMESTAMP);
@@ -122,7 +126,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         if (optionalMetricMetadata.isEmpty()) {
             return new ResponseEntity<>(new BasicResponseDTO("Table not found", false),
                     HttpStatus.NOT_FOUND);
-        };
+        }
 
         this.metricMetadataService.deleteByMetricName(metricName);
 
@@ -206,7 +210,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
                         rs.getTimestamp("timestamp").toInstant(),
                         rs.getFloat("value")
                 )
-        )
+            )
         );
     }
 

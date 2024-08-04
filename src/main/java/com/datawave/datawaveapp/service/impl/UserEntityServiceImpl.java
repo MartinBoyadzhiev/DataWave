@@ -33,11 +33,11 @@ public class UserEntityServiceImpl implements UserEntityService {
     public UserEntityServiceImpl(UserRepository userRepository,
                                  PasswordEncoder passwordEncoder,
                                  UserDetailsService userDetailsService,
-                                 @Value("${jwt.secret}") String secret) {
+                                 JwtProvider jwtProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
-        this.jwtProvider = new JwtProvider(secret);
+        this.jwtProvider = jwtProvider;
     }
 
     @Override
@@ -69,6 +69,16 @@ public class UserEntityServiceImpl implements UserEntityService {
         authResponseDTO.setMessage("Register Success");
         authResponseDTO.setStatus(true);
         return new ResponseEntity<>(authResponseDTO, HttpStatus.OK);
+    }
+
+    @Override
+    public UserEntity getUserByEmail(String email) {
+
+        Optional<UserEntity> optionalUser = this.userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+            throw new BadCredentialsException("User not found");
+        }
+        return optionalUser.get();
     }
 
     @Override

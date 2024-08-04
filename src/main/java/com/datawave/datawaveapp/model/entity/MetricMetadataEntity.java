@@ -14,19 +14,19 @@ public class MetricMetadataEntity extends BaseEntity {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<ColumnMetadataEntity> columns;
 
-    public String getMetricName() {
-        return metricName;
-    }
-
-    public void setMetricName(String metricName) {
-        this.metricName = metricName;
+    public void setColumns(Set<ColumnMetadataEntity> columns) {
+        this.columns = columns;
     }
 
     public Set<ColumnMetadataEntity> getColumns() {
         return columns;
     }
 
-    public void setColumnNames(Set<ColumnMetadataEntity> columnNames) {
-        this.columns = columnNames;
+    public String getMetricName() {
+        return metricName;
+    }
+
+    public void setMetricName(String metricName) {
+        this.metricName = metricName;
     }
 }

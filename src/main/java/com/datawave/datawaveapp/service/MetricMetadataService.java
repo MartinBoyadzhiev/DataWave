@@ -14,4 +14,6 @@ public interface MetricMetadataService {
     boolean deleteByMetricName(String metricName);
 
     Set<MetricOverviewDTO> getAllMetricOverview();
+
+    MetricMetadataEntity getMetricMetadataByName(String metricName);
 }
