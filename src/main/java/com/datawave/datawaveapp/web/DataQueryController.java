@@ -14,14 +14,10 @@ import java.util.Set;
 public class DataQueryController {
 
     private final ClickHouseService clickHouseService;
-    private final MetricMetadataService metricMetadataService;
 
-    public DataQueryController(ClickHouseService clickHouseService, MetricMetadataService metricMetadataService) {
+    public DataQueryController(ClickHouseService clickHouseService) {
         this.clickHouseService = clickHouseService;
-        this.metricMetadataService = metricMetadataService;
     }
-
-
 
     @GetMapping("/metric/{metricName}/data")
     public Set<MetricDataDTO> getMetricData(@PathVariable("metricName") String metricName,

@@ -40,7 +40,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         String mappedMetricName = "metric_" + metricName;
         Map<String, Object> sortedFilters = new TreeMap<>(filter);
 
-        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(mappedMetricName);
+        Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(metricName);
         if (optionalMetricMetadata.isEmpty()) {
             throw new IllegalArgumentException("Metric not found");
         }

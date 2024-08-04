@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class MetricStatsEntity extends BaseEntity {
     @Column
     private long count;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "metric_metadata_id", referencedColumnName = "id", nullable = false)
     private MetricMetadataEntity metricMetadataEntity;
     @ManyToOne
