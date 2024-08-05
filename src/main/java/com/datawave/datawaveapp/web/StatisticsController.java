@@ -25,7 +25,6 @@ public class StatisticsController {
     @PutMapping("/metric/statistics")
     public void updateStatistics(@Valid @Pattern(regexp = "^[a-zA-Z0-9]*$") @RequestParam String metricName,
                                  @RequestHeader("Authorization") String token) {
-        System.out.println("Received token: " + token);
         this.metricStatsService.updateStatistics(metricName, token);
     }
 }

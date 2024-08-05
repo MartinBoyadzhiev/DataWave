@@ -7,6 +7,7 @@ import com.datawave.datawaveapp.model.dto.SignUpDTO;
 import com.datawave.datawaveapp.model.entity.UserEntity;
 import com.datawave.datawaveapp.repository.mysqlRepositories.UserRepository;
 import com.datawave.datawaveapp.service.UserEntityService;
+import com.datawave.datawaveapp.service.exceptions.UserAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class UserEntityServiceImpl implements UserEntityService {
     }
 
     @Override
-    public ResponseEntity<AuthResponseDTO> register(SignUpDTO user) throws Exception {
+    public ResponseEntity<AuthResponseDTO> register(SignUpDTO user) {
         String email = user.getEmail();
         String password = user.getPassword();
         String role = user.getRole();
@@ -49,7 +50,7 @@ public class UserEntityServiceImpl implements UserEntityService {
         Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
         //TODO: Setup unique constraint on email column in the database
         if (!optionalUser.isEmpty()) {
-            throw new Exception("Email Is Already Used With Another Account");
+            throw new UserAlreadyExistsException("User with " + email + " already exists");
         }
 
         UserEntity createdUser = new UserEntity();
@@ -93,7 +94,10 @@ public class UserEntityServiceImpl implements UserEntityService {
         AuthResponseDTO authResponse = new AuthResponseDTO();
 
         Optional<UserEntity> optionalUser = userRepository.findByEmail(username);
-        boolean isAdmin = optionalUser.isPresent() && "ROLE_ADMIN".equals(optionalUser.get().getRole());
+        if (optionalUser.isEmpty()) {
+            throw new BadCredentialsException("User not found");
+        }
+        boolean isAdmin = "ROLE_ADMIN".equals(optionalUser.get().getRole());
 
         authResponse.setMessage("Login success");
         authResponse.setJwt(token);

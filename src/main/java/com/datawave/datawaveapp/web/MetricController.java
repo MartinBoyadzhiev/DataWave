@@ -1,6 +1,5 @@
 package com.datawave.datawaveapp.web;
 
-import com.datawave.datawaveapp.exceptions.ResourceNotFoundException;
 import com.datawave.datawaveapp.model.dto.BasicResponseDTO;
 import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.dto.InsertDataDTO;
@@ -26,13 +25,7 @@ public class MetricController {
 
     @PutMapping("/metric/insert-data")
     public ResponseEntity<String> insertData(@RequestBody InsertDataDTO insertDataDTO) throws IOException {
-        try {
-            this.dataService.insertData(insertDataDTO);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException a) {
-            return ResponseEntity.badRequest().build();
-        }
+        this.dataService.insertData(insertDataDTO);
         return ResponseEntity.ok().build();
     }
 

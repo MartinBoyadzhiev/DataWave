@@ -9,6 +9,7 @@ import com.datawave.datawaveapp.repository.mysqlRepositories.MetricStatsReposito
 import com.datawave.datawaveapp.service.MetricMetadataService;
 import com.datawave.datawaveapp.service.MetricStatsService;
 import com.datawave.datawaveapp.service.UserEntityService;
+import com.datawave.datawaveapp.service.exceptions.MetricNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class MetricStatsServiceImpl implements MetricStatsService {
         MetricMetadataEntity metricMetadata = metricMetadataService.getMetricMetadataByName(metricName);
 
         if (metricMetadata == null) {
-            throw new IllegalArgumentException("Metric with name " + metricName + " does not exist");
+            throw new MetricNotFoundException("Metric with name " + metricName + " does not exist");
         }
         Optional<MetricStatsEntity> optionalMetricStats = metricStatsRepository
                 .findByMetricMetadataEntityIdAndUserEntityId(metricMetadata.getId(), user.getId());

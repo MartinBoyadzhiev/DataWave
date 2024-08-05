@@ -1,6 +1,7 @@
 package com.datawave.datawaveapp.service.impl;
 
-import com.datawave.datawaveapp.exceptions.ResourceNotFoundException;
+import com.datawave.datawaveapp.service.exceptions.IllegalCSVDataFormatException;
+import com.datawave.datawaveapp.service.exceptions.MetricNotFoundException;
 import com.datawave.datawaveapp.model.dto.InsertDataDTO;
 import com.datawave.datawaveapp.model.entity.ColumnMetadataEntity;
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
@@ -31,18 +32,17 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public void insertData(InsertDataDTO insertDataDTO) throws IOException, ResourceNotFoundException {
+    public void insertData(InsertDataDTO insertDataDTO) throws IOException {
 
         try {
             String metricName = insertDataDTO.getMetricName();
             String clikhouseMetricName = "metric_" + metricName;
             String metricData = insertDataDTO.getCsvData();
 
-
             Optional<MetricMetadataEntity> optionalMetricMetadataEntity = this.metricMetadataService.getByMetricName(metricName);
 
             if (optionalMetricMetadataEntity.isEmpty()) {
-                throw new ResourceNotFoundException("Metric not found");
+                throw new MetricNotFoundException("Metric not found");
             }
 
             MetricMetadataEntity metricMetadata = optionalMetricMetadataEntity.get();
@@ -83,7 +83,7 @@ public class DataServiceImpl implements DataService {
                         ValueTypeEnum valueTypeEnum = columnTypesMap.get(headerName);
                         String recordColumnData = record.get(headerName);
                         if (recordColumnData == null) {
-                            throw new IllegalArgumentException("CSV contains null data");
+                            throw new IllegalCSVDataFormatException("CSV contains null data\nPlease check the instructions and try again");
                         }
                         switch (valueTypeEnum) {
                             case STRING:
@@ -104,7 +104,7 @@ public class DataServiceImpl implements DataService {
                 });
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("Error inserting data");
+            throw new IllegalArgumentException("Error inserting data\nPlease check the instructions and try again");
         }
     }
 
@@ -112,7 +112,7 @@ public class DataServiceImpl implements DataService {
         Set<String> headers = new HashSet<>(header);
         Set<String> columnNames = columnTypes.stream().map(ColumnMetadataEntity::getName).collect(Collectors.toSet());
         if (!columnNames.containsAll(headers)) {
-            throw new IllegalArgumentException("Headers do not match column names");
+            throw new IllegalCSVDataFormatException("Headers do not match column names\nPlease check the instructions and try again");
         }
     }
 
