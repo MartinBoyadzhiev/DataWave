@@ -1,0 +1,57 @@
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: 'TRUE'
+    hibernate:
+      ddl-auto: update
+    open-in-view: 'false'
+  mvc:
+    hiddenMethod:
+      filter:
+        enabled: 'true'
+  datasource:
+    mysql:
+      url: jdbc:mysql://localhost:3506/datawave?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driverClassName: com.mysql.cj.jdbc.Driver
+    clickhouse:
+      url: jdbc:ch://localhost:8123/default
+#      password:
+#      username:
+      driverClassName: com.clickhouse.jdbc.ClickHouseDriver
+#  security:
+#    filter:
+#      chain:
+#        content-negotiation:
+#          parameter-strategy: 'ignore'
+#        any-request:
+#          authorized: 'permitAll'
+#        request-matcher:
+#          path:
+#            pattern: '/api/**'
+#            authenticated: 'true'
+#    csrf:
+#      disabled: 'true'
+#    cors:
+#      configurationSource:
+#        allowedOrigins: //localhost:5173
+#        allowedMethods: '*'
+#        allowedHeaders: '*'
+#        allowCredentials: 'true'
+#        exposedHeaders: 'Authorization'
+#        maxAge: '3600'
+logging:
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor: TRACE
+        SQL: DEBUG
+      nodeValue: WARN
+    blog: WARN
+server:
+  port: 8080
+jwt.secret: ${JWT_SECRET}

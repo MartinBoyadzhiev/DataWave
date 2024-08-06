@@ -1,6 +1,5 @@
 package com.datawave.datawaveapp.service;
 
-import com.datawave.datawaveapp.model.dto.BasicResponseDTO;
 import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.dto.MetricDataDTO;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,7 @@ public interface ClickHouseService {
 
     List<String> getFilteredValues(String metricName, String column, Map<String, Object> filter);
 
-    ResponseEntity<BasicResponseDTO> createTable(CreateTableDTO createTableData);
+    void createTable(CreateTableDTO createTableData);
 
-    ResponseEntity<BasicResponseDTO> deleteTable(String metricName);
+    void deleteTable(String metricName);
 }

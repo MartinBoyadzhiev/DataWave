@@ -17,16 +17,9 @@ public class MetricStatsEntity extends BaseEntity {
     public MetricStatsEntity() {
     }
 
-    public MetricMetadataEntity getMetricMetadataEntity() {
-        return metricMetadataEntity;
-    }
 
     public void setMetricMetadataEntity(MetricMetadataEntity metricMetadataEntity) {
         this.metricMetadataEntity = metricMetadataEntity;
-    }
-
-    public UserEntity getUserEntity() {
-        return userEntity;
     }
 
     public void setUserEntity(UserEntity userEntity) {

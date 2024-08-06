@@ -1,6 +1,5 @@
 package com.datawave.datawaveapp.web;
 
-import com.datawave.datawaveapp.model.dto.BasicResponseDTO;
 import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.dto.InsertDataDTO;
 import com.datawave.datawaveapp.service.ClickHouseService;
@@ -24,20 +23,22 @@ public class MetricController {
     }
 
     @PutMapping("/metric/insert-data")
-    public ResponseEntity<String> insertData(@RequestBody InsertDataDTO insertDataDTO) throws IOException {
+    public ResponseEntity insertData(@Valid @RequestBody InsertDataDTO insertDataDTO) throws IOException {
         this.dataService.insertData(insertDataDTO);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/metric/delete")
-    public ResponseEntity<BasicResponseDTO> deleteTable(@Valid
-                                                        @Pattern(regexp = "^[a-zA-Z0-9]*$")
-                                                        @RequestParam String metricName) {
-        return this.clickHouseService.deleteTable(metricName);
+    public ResponseEntity deleteTable(@Valid
+                                @Pattern(regexp = "^[a-zA-Z0-9]*$")
+                                @RequestParam String metricName) {
+        this.clickHouseService.deleteTable(metricName);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/metric/create")
-    public ResponseEntity<BasicResponseDTO> createTable(@Valid @RequestBody CreateTableDTO createTableData) {
-        return this.clickHouseService.createTable(createTableData);
+    public ResponseEntity createTable(@Valid @RequestBody CreateTableDTO createTableData) {
+        this.clickHouseService.createTable(createTableData);
+        return ResponseEntity.ok().build();
     }
 }

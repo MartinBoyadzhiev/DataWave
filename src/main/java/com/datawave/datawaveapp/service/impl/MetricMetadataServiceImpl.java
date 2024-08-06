@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class MetricMetadataServiceImpl implements MetricMetadataService {
     private final MetricMetadataRepository metricMetadataRepository;
-    private final ModelMapper modelMapper;
 
-    public MetricMetadataServiceImpl(MetricMetadataRepository metricMetadataRepository, ModelMapper modelMapper) {
+
+    public MetricMetadataServiceImpl(MetricMetadataRepository metricMetadataRepository) {
         this.metricMetadataRepository = metricMetadataRepository;
-        this.modelMapper = modelMapper;
+
     }
 
     @Override

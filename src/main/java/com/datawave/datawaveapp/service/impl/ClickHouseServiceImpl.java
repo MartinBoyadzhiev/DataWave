@@ -1,7 +1,6 @@
 package com.datawave.datawaveapp.service.impl;
 
 import com.datawave.datawaveapp.config.securityConfig.JwtProvider;
-import com.datawave.datawaveapp.model.dto.BasicResponseDTO;
 import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.dto.MetricDataDTO;
 import com.datawave.datawaveapp.model.entity.*;
@@ -10,11 +9,11 @@ import com.datawave.datawaveapp.service.ClickHouseService;
 import com.datawave.datawaveapp.service.MetricMetadataService;
 import com.datawave.datawaveapp.service.UserEntityService;
 import com.datawave.datawaveapp.service.exceptions.ColumnNotFoundException;
+import com.datawave.datawaveapp.service.exceptions.IllegalColumnNameException;
 import com.datawave.datawaveapp.service.exceptions.MetricAlreadyExistsException;
 import com.datawave.datawaveapp.service.exceptions.MetricNotFoundException;
+import com.datawave.datawaveapp.util.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +79,7 @@ public class ClickHouseServiceImpl implements ClickHouseService {
     }
 
     @Override
-    public ResponseEntity<BasicResponseDTO> createTable(CreateTableDTO createTableData) {
+    public void createTable(CreateTableDTO createTableData) {
 
         String metricName = createTableData.getMetricName();
         String mappedMetricName = "metric_" + metricName;
@@ -118,16 +117,14 @@ public class ClickHouseServiceImpl implements ClickHouseService {
         this.metricMetadataService.save(metricMetadata);
         this.columnMetadataRepository.saveAll(metricMetadata.getColumns());
 
-        StringBuilder query = new StringBuilder(buildCreateTableQuery(mappedMetricName, valueType.getValue(), columns, primaryKeys));
+        StringBuilder query = new StringBuilder(buildCreateTableQuery(mappedMetricName, valueType, columns, primaryKeys));
 
         this.jdbcTemplate.execute(query.toString());
-
-        return new ResponseEntity<>(new BasicResponseDTO("Table created successfully.", true), HttpStatus.CREATED);
     }
 
     @Override
     @Transactional
-    public ResponseEntity<BasicResponseDTO> deleteTable(String metricName) {
+    public void deleteTable(String metricName) {
         String mappedMetricName = "metric_" + metricName;
         Optional<MetricMetadataEntity> optionalMetricMetadata = this.metricMetadataService.getByMetricName(metricName);
 
@@ -139,14 +136,17 @@ public class ClickHouseServiceImpl implements ClickHouseService {
 
         this.jdbcTemplate.execute("DROP TABLE default." + mappedMetricName);
 
-        return new ResponseEntity<>(new BasicResponseDTO("Table deleted successfully", true), HttpStatus.OK);
     }
 
-    private String buildCreateTableQuery(String metricName, String valueType, Map<String, ValueTypeEnum> columns, List<String> primaryKeys) {
-//        FIXME: This is a SQL injection vulnerability
+    private String buildCreateTableQuery(String metricName, ValueTypeEnum valueType, Map<String, ValueTypeEnum> columns, List<String> primaryKeys) {
+
+        columns.keySet().stream().filter(c -> !StringUtils.isAlphanumeric(c)).forEach(column -> {
+            throw new IllegalColumnNameException("Column name must be alphanumeric");
+        });
+
         StringBuilder query = new StringBuilder();
         query.append("CREATE TABLE default.").append(metricName)
-                .append(" (timestamp DateTime, value ").append(valueType)
+                .append(" (timestamp DateTime, value ").append(valueType.getValue())
                 .append(", ");
         String fields = columns.entrySet().stream()
                 .map(entry -> entry.getKey() + " " + entry.getValue())

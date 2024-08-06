@@ -4,6 +4,7 @@ import com.datawave.datawaveapp.model.dto.AuthResponseDTO;
 import com.datawave.datawaveapp.model.dto.LoginDTO;
 import com.datawave.datawaveapp.model.dto.SignUpDTO;
 import com.datawave.datawaveapp.service.UserEntityService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponseDTO> createUserHandler(@RequestBody SignUpDTO user) throws Exception {
+    public ResponseEntity<AuthResponseDTO> createUserHandler(@Valid @RequestBody SignUpDTO user) throws Exception {
         return userService.register(user);
     }
 

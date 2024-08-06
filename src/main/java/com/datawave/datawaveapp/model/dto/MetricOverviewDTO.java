@@ -18,6 +18,13 @@ public class MetricOverviewDTO {
         this.metricName = metricName;
     }
 
+    public MetricOverviewDTO() {
+    }
+    public MetricOverviewDTO(String metricName, Map<String, ValueTypeEnum> columns) {
+        this.metricName = metricName;
+        this.columns = columns;
+    }
+
     public Map<String, ValueTypeEnum> getColumns() {
         return columns;
     }

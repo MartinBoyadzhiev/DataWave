@@ -32,7 +32,7 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public void insertData(InsertDataDTO insertDataDTO) throws IOException {
+    public void insertData(InsertDataDTO insertDataDTO) {
 
         try {
             String metricName = insertDataDTO.getMetricName();
@@ -64,13 +64,7 @@ public class DataServiceImpl implements DataService {
             List<String> headersList = Arrays.asList(headersArr);
             validateHeaders(columnTypes, headersList);
 
-            StringBuilder query = new StringBuilder("INSERT INTO " + clikhouseMetricName + " (");
-
-
-            query.append(headersList.stream().collect(Collectors.joining(", ")));
-            query.append(") VALUES (");
-            query.append(headersList.stream().map(column -> "?").collect(Collectors.joining(", ")));
-            query.append(")");
+            StringBuilder query = buildInsertDataPreparedStatementQuery(clikhouseMetricName, headersList);
 
             Map<String, ValueTypeEnum> columnTypesMap = columnTypes.stream()
                     .collect(Collectors.toMap(ColumnMetadataEntity::getName, ColumnMetadataEntity::getType));
@@ -108,7 +102,18 @@ public class DataServiceImpl implements DataService {
         }
     }
 
-    private void validateHeaders(Set<ColumnMetadataEntity> columnTypes, List<String> header) {
+    StringBuilder buildInsertDataPreparedStatementQuery(String clikhouseMetricName, List<String> headersList) {
+        StringBuilder query = new StringBuilder("INSERT INTO " + clikhouseMetricName + " (");
+
+
+        query.append(headersList.stream().collect(Collectors.joining(", ")));
+        query.append(") VALUES (");
+        query.append(headersList.stream().map(column -> "?").collect(Collectors.joining(", ")));
+        query.append(")");
+        return query;
+    }
+
+    void validateHeaders(Set<ColumnMetadataEntity> columnTypes, List<String> header) {
         Set<String> headers = new HashSet<>(header);
         Set<String> columnNames = columnTypes.stream().map(ColumnMetadataEntity::getName).collect(Collectors.toSet());
         if (!columnNames.containsAll(headers)) {

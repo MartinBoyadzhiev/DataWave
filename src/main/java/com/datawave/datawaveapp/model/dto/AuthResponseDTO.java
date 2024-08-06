@@ -6,6 +6,16 @@ public class AuthResponseDTO {
     private boolean isAdmin;
     private boolean status;
 
+    public AuthResponseDTO() {
+    }
+
+    public AuthResponseDTO(String jwt, String message, boolean isAdmin, boolean status) {
+        this.jwt = jwt;
+        this.message = message;
+        this.isAdmin = isAdmin;
+        this.status = status;
+    }
+
     public String getJwt() {
         return jwt;
     }
@@ -14,17 +24,11 @@ public class AuthResponseDTO {
         this.jwt = jwt;
     }
 
-    public String getMessage() {
-        return message;
-    }
 
     public void setMessage(String message) {
         this.message = message;
     }
 
-    public boolean getAdmin() {
-        return isAdmin;
-    }
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
@@ -36,5 +40,17 @@ public class AuthResponseDTO {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public boolean isStatus() {
+        return status;
     }
 }

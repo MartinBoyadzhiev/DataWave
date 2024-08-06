@@ -9,6 +9,9 @@ public class ErrorResponse {
         this.message = message;
     }
 
+    public ErrorResponse() {
+    }
+
     public int getStatusCode() {
         return statusCode;
     }

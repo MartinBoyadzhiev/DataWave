@@ -5,20 +5,32 @@ import java.util.Objects;
 
 public class MetricDataDTO implements Comparable<MetricDataDTO> {
 
-    private final Instant timestamp;
-    private final Number value;
+    private Instant timestamp;
+    private Number value;
+
 
     public MetricDataDTO(Instant timestamp, Number value) {
         this.timestamp = timestamp;
         this.value = value;
     }
 
+    public MetricDataDTO() {
+    }
+
     public Instant getTimestamp() {
         return timestamp;
     }
 
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public Number getValue() {
         return value;
+    }
+
+    public void setValue(Number value) {
+        this.value = value;
     }
 
     @Override

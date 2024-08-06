@@ -7,9 +7,9 @@ import java.util.Objects;
 @Entity
 @Table(name = "column_metadata")
 public class ColumnMetadataEntity extends BaseEntity {
-    @Column
+    @Column(nullable = false)
     private String name;
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ValueTypeEnum type;
 

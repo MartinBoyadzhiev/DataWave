@@ -17,14 +17,6 @@ public class MetricMetadataEntity extends BaseEntity {
     @OneToMany(mappedBy = "metricMetadataEntity", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<MetricStatsEntity> metricStats;
 
-    public Set<MetricStatsEntity> getMetricStats() {
-        return metricStats;
-    }
-
-    public void setMetricStats(Set<MetricStatsEntity> metricStats) {
-        this.metricStats = metricStats;
-    }
-
     public void setColumns(Set<ColumnMetadataEntity> columns) {
         this.columns = columns;
     }

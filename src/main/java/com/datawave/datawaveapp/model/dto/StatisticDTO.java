@@ -8,12 +8,9 @@ public class StatisticDTO {
     public StatisticDTO() {
     }
 
-    public String getMetricName() {
-        return metricName;
-    }
-
-    public void setMetricName(String metricName) {
+    public StatisticDTO(String metricName, long count) {
         this.metricName = metricName;
+        this.count = count;
     }
 
     public long getCount() {
@@ -23,4 +20,14 @@ public class StatisticDTO {
     public void setCount(long count) {
         this.count = count;
     }
+
+    public String getMetricName() {
+        return metricName;
+    }
+
+    public void setMetricName(String metricName) {
+        this.metricName = metricName;
+    }
+
+
 }

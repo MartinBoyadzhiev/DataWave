@@ -11,9 +11,9 @@ import jakarta.persistence.Table;
 public class UserEntity extends BaseEntity {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column
+    @Column(nullable = false)
     private String password;
-    @Column
+    @Column(unique = true, nullable = false)
     private String email;
     @Column
     private String role = "ROLE_USER";
