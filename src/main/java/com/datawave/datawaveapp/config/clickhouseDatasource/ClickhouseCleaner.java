@@ -18,7 +18,7 @@ public class ClickhouseCleaner {
         this.metricMetadataRepository = metricMetadataRepository;
     }
 
-    @Scheduled(initialDelay = 1000, fixedDelay = 10000)
+    @Scheduled(initialDelay = 1000, fixedDelay = 60000)
     public void cleanOldData() {
 
         this.metricMetadataRepository.findAll().forEach(metricMetadataEntity -> {

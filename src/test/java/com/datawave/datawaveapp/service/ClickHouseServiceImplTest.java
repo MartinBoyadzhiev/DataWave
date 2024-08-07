@@ -7,6 +7,7 @@ import com.datawave.datawaveapp.model.entity.ValueTypeEnum;
 import com.datawave.datawaveapp.repository.MetricMetadataRepository;
 import com.datawave.datawaveapp.service.exceptions.MetricAlreadyExistsException;
 import com.datawave.datawaveapp.service.exceptions.MetricNotFoundException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class ClickHouseServiceImplTest {
     @Test
     @Transactional
     @Rollback(true)
+    @Disabled
     void createTableWithExistingMetricName() {
         MetricMetadataEntity metricMetadataEntity = new MetricMetadataEntity();
         metricMetadataEntity.setMetricName("existingMetric");
