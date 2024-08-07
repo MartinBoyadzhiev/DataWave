@@ -1,6 +1,6 @@
 package com.datawave.datawaveapp.config.clickhouseDatasource;
 
-import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
+import com.datawave.datawaveapp.repository.MetricMetadataRepository;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;

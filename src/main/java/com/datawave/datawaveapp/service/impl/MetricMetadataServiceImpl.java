@@ -3,9 +3,8 @@ package com.datawave.datawaveapp.service.impl;
 import com.datawave.datawaveapp.model.dto.MetricOverviewDTO;
 import com.datawave.datawaveapp.model.entity.ColumnMetadataEntity;
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
-import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
+import com.datawave.datawaveapp.repository.MetricMetadataRepository;
 import com.datawave.datawaveapp.service.MetricMetadataService;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

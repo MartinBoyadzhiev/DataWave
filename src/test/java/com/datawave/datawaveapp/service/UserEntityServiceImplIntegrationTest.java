@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
-class UserEntityServiceImpl {
+class UserEntityServiceImplIntegrationTest {
 
     @Autowired
     private UserEntityService userEntityService;
@@ -104,7 +104,7 @@ class UserEntityServiceImpl {
         SignUpDTO signUpDTO = new SignUpDTO("test@example.com", "password", "ROLE_USER");
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail("test@example.com");
-        userEntity.setRole("ROLE_USER");
+//        userEntity.setRole("ROLE_USER");
         userEntity.setPassword("encodedPassword");
 
         ResponseEntity<AuthResponseDTO> response = userEntityService.register(signUpDTO);

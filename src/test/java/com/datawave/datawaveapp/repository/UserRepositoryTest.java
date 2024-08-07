@@ -10,9 +10,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-public class UserRepository {
+public class UserRepositoryTest {
 
-    private com.datawave.datawaveapp.repository.mysqlRepositories.UserRepository userRepository = mock(com.datawave.datawaveapp.repository.mysqlRepositories.UserRepository.class);
+    private UserRepository userRepository = mock(UserRepository.class);
 
     @Test
     void findByEmail_ReturnsUserEntity_WhenEmailExists() {

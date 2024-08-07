@@ -12,10 +12,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class MetricMetadataRepository {
+public class MetricMetadataRepositoryIntegrationTest {
 
     @Autowired
-    private com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository repository;
+    private MetricMetadataRepository repository;
 
     @Test
     @Transactional

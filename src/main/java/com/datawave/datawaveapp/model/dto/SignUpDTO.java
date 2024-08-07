@@ -12,22 +12,16 @@ public class SignUpDTO {
     @Size(min = 6)
     @NotEmpty
     private String password;
-    @NotEmpty
-    private String role;
 
     public SignUpDTO(String email, String password, String role) {
         this.email = email;
         this.password = password;
-        this.role = role;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
 
     public String getEmail() {
         return email;
@@ -41,9 +35,5 @@ public class SignUpDTO {
         return password;
     }
 
-
-    public String getRole() {
-        return role;
-    }
 
 }

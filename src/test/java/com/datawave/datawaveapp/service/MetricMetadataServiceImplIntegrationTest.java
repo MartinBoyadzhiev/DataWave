@@ -4,7 +4,7 @@ import com.datawave.datawaveapp.model.dto.MetricOverviewDTO;
 import com.datawave.datawaveapp.model.entity.ColumnMetadataEntity;
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
 import com.datawave.datawaveapp.model.entity.ValueTypeEnum;
-import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
+import com.datawave.datawaveapp.repository.MetricMetadataRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +19,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class MetricMetadataServiceImpl {
+public class MetricMetadataServiceImplIntegrationTest {
 
     @Autowired
     private MetricMetadataRepository metricMetadataRepository;

@@ -22,8 +22,9 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponseDTO> createUserHandler(@Valid @RequestBody SignUpDTO user) throws Exception {
-        return userService.register(user);
+    public ResponseEntity createUserHandler(@Valid @RequestBody SignUpDTO user) throws Exception {
+        this.userService.register(user);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/signin")

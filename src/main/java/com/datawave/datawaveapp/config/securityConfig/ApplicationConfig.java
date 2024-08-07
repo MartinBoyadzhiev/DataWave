@@ -22,8 +22,12 @@ public class ApplicationConfig {
     SecurityFilterChain filterChain(HttpSecurity http, @Autowired JwtTokenValidator jwtTokenValidator) throws Exception {
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests(
-                        authorize -> authorize.requestMatchers("/metric/**")
-                                .authenticated().anyRequest().permitAll())
+                        authorize -> authorize
+                                .requestMatchers("/metric/**").authenticated()
+                                .requestMatchers("/metric/insert-data",
+                                        "metric/create",
+                                        "metric/delete").hasRole("ADMIN")
+                                .anyRequest().permitAll())
                 .addFilterBefore(jwtTokenValidator, BasicAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));

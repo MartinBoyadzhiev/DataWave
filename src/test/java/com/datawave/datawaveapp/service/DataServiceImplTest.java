@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
-class DataServiceImpl {
+class DataServiceImplTest {
 
     @Autowired
     private DataService dataServiceImpl;

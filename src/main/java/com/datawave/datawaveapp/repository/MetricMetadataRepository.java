@@ -1,4 +1,4 @@
-package com.datawave.datawaveapp.repository.mysqlRepositories;
+package com.datawave.datawaveapp.repository;
 
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

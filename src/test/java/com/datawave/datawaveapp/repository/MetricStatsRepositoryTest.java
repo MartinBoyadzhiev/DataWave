@@ -9,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MetricStatsRepository {
+public class MetricStatsRepositoryTest {
 
-    private com.datawave.datawaveapp.repository.mysqlRepositories.MetricStatsRepository metricStatsRepository = mock(com.datawave.datawaveapp.repository.mysqlRepositories.MetricStatsRepository.class);
+    private MetricStatsRepository metricStatsRepository = mock(MetricStatsRepository.class);
 
     @Test
     void findByMetricMetadataEntityIdAndUserEntityId_ReturnsMetricStatsEntity_WhenIdsExist() {

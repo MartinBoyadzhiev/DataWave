@@ -4,7 +4,7 @@ import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.entity.ColumnMetadataEntity;
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
 import com.datawave.datawaveapp.model.entity.ValueTypeEnum;
-import com.datawave.datawaveapp.repository.mysqlRepositories.MetricMetadataRepository;
+import com.datawave.datawaveapp.repository.MetricMetadataRepository;
 import com.datawave.datawaveapp.service.exceptions.MetricAlreadyExistsException;
 import com.datawave.datawaveapp.service.exceptions.MetricNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @SpringBootTest
-public class ClickHouseServiceImpl {
+public class ClickHouseServiceImplTest {
 
     @Autowired
     private ClickHouseService clickHouseServiceImpl;

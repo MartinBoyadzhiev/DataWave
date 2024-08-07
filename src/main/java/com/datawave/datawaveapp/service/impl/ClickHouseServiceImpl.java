@@ -4,7 +4,7 @@ import com.datawave.datawaveapp.config.securityConfig.JwtProvider;
 import com.datawave.datawaveapp.model.dto.CreateTableDTO;
 import com.datawave.datawaveapp.model.dto.MetricDataDTO;
 import com.datawave.datawaveapp.model.entity.*;
-import com.datawave.datawaveapp.repository.mysqlRepositories.ColumnMetadataRepository;
+import com.datawave.datawaveapp.repository.ColumnMetadataRepository;
 import com.datawave.datawaveapp.service.ClickHouseService;
 import com.datawave.datawaveapp.service.MetricMetadataService;
 import com.datawave.datawaveapp.service.UserEntityService;

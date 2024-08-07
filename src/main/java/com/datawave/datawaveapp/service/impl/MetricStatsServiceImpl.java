@@ -5,7 +5,7 @@ import com.datawave.datawaveapp.model.dto.StatisticDTO;
 import com.datawave.datawaveapp.model.entity.MetricMetadataEntity;
 import com.datawave.datawaveapp.model.entity.MetricStatsEntity;
 import com.datawave.datawaveapp.model.entity.UserEntity;
-import com.datawave.datawaveapp.repository.mysqlRepositories.MetricStatsRepository;
+import com.datawave.datawaveapp.repository.MetricStatsRepository;
 import com.datawave.datawaveapp.service.MetricMetadataService;
 import com.datawave.datawaveapp.service.MetricStatsService;
 import com.datawave.datawaveapp.service.UserEntityService;
